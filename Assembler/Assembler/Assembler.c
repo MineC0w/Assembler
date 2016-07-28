@@ -74,6 +74,8 @@ int assemble(char *filename)
 		else
 		{
 			/* An instruction.  */
+			short numOperands = 0;
+			operand operands[2];
 
 			/* Get the operator */
 			char op[MAX_OP_LENGTH] = { lineContent[currentChar],lineContent[currentChar + 1],lineContent[currentChar + 2],lineContent[currentChar + 3] };
@@ -87,7 +89,43 @@ int assemble(char *filename)
 				/* No operands. */
 			}
 			else {
+				numOperands++;
 				/* One or two operands, get them. */
+
+				operands[0] = getOperand(lineContent, lineCounter);
+
+				/* Check if there's a second operand */
+
+				IGNORE_SPACES(lineContent, lineCounter);
+
+				if (lineContent[lineCounter] == ',') {
+					numOperands++;
+					getOperand(lineContent, lineCounter);
+
+				}
+				else if (lineContent[lineCounter] == '\n') {
+					/* only one operand */
+				}
+				else {
+					/* illegal char */
+				}
+
+				IGNORE_SPACES(lineContent,lineCounter);
+
+				if (lineContent[lineCounter] != '\n') 
+				{
+					/* Error: can't have more characters after the 2nd operand */
+				}
+				else {
+					/* Everything is all right. Calculate L and update the label, if it exists. */
+					int L = 1;
+					if (numOperands == 1) { L = 2; }
+					if (numOperands == 2) {
+						/* Complicated. Need to check more precisely operands. */
+					}
+
+					/* Finally ready to finish with processing the line. */
+				}
 
 
 			}
@@ -103,4 +141,18 @@ int isLegalChar(char c)
 {
 	return ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'));
 
+}
+
+operand getOperand(char line[LINE_LENGTH], int i) {
+	/* Check if number */
+	if (line[i] == '#')
+	{
+		/* Number */
+	}
+	else if (line[i] == 'r' && !isLegalChar(line[i + 2]) && line[i + 1] > '0' && line[i + 1] < '7') {
+		/* Register */
+	}
+	else {
+		/* Label */
+	}
 }
