@@ -11,6 +11,6 @@ typedef struct Symbol {
 	
 } Symbol;
 
-typedef enum {
+typedef enum SymbolType {
 	Code, Data
 } SymbolType;

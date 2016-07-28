@@ -73,13 +73,23 @@ int assemble(char *filename)
 		}
 		else
 		{
-			/* An instruction. Check which operator. */
+			/* An instruction.  */
+
+			/* Get the operator */
 			char op[MAX_OP_LENGTH] = { lineContent[currentChar],lineContent[currentChar + 1],lineContent[currentChar + 2],lineContent[currentChar + 3] };
 
+			currentChar += lineContent[lineCounter] == ' ' ? 3 : 4;
+			IGNORE_SPACES(lineContent, lineCounter);
 			
-			switch (op)
+			/* Now all that's remaining is either 1, 2, or no operands. */
+			if (lineContent[lineCounter] == '\n')
 			{
-			case "mov":
+				/* No operands. */
+			}
+			else {
+				/* One or two operands, get them. */
+
+
 			}
 
 
