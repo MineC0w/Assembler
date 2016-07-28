@@ -147,7 +147,14 @@ operand getOperand(char line[LINE_LENGTH], int i) {
 	/* Check if number */
 	if (line[i] == '#')
 	{
+		int num = (line[i+1] == '+') ? 1 : -1;
+		if(line[i+1] != '-' && num == -1) { /* Illegal num */}
 		/* Number */
+		for (i++; line[i] != ' ' && line[i] != ','; i++)
+		{
+			i *= 10;
+			i += line[i] - '0';
+		}
 	}
 	else if (line[i] == 'r' && !isLegalChar(line[i + 2]) && line[i + 1] > '0' && line[i + 1] < '7') {
 		/* Register */
