@@ -14,6 +14,7 @@
 /* Prototypes */
 int assemble(char *filename);
 int isLegalChar(char c);
+operand getOperand(char line[LINE_LENGTH], int);
 /* Global variables */
 Symbol ExternTable;
 

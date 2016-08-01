@@ -6,8 +6,8 @@ typedef struct Symbol {
 	char label[LABEL_LENGTH];
 	int counter;
 	int content;
-	SymbolType type;
-	Symbol *next;
+	enum SymbolType type;
+	struct Symbol *next;
 	
 } Symbol;
 
@@ -16,7 +16,7 @@ typedef enum SymbolType {
 } SymbolType;
 
 typedef enum Register {
-	r1, r2, r3, r4, r5, r6
+	r1, r2, r3, r4
 } Register;
 
 typedef union operand {
