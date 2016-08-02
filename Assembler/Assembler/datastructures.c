@@ -19,8 +19,18 @@ typedef enum Register {
 	r1, r2, r3, r4
 } Register;
 
-typedef union operand {
+typedef union OperandData {
 	int number;
 	char label[LABEL_LENGTH];
 	Register reg;
+} OperandData;
+
+typedef enum OperandType {
+	Reg, Number, Label
+} OperandType;
+
+typedef struct operand {
+	OperandType type;
+	OperandData data;
 } operand;
+

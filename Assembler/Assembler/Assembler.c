@@ -3,6 +3,7 @@
 #include "datastructures.c"
 
 #define IGNORE_SPACES(n,i) { for(++i; n[i] == ' ' || n[i] == '\t'; ++i); }
+#define GET_NUM(num, i, src) { };
 
 #define LINE_LENGTH 80
 #define LABEL_LENGTH 30
@@ -18,6 +19,8 @@ operand getOperand(char line[LINE_LENGTH], int);
 /* Global variables */
 Symbol ExternTable;
 
+#pragma warning(disable : 4996)
+
 int main(int argc, char *argv[])
 {
 	int i;
@@ -31,11 +34,11 @@ int main(int argc, char *argv[])
 
 int assemble(char *filename)
 {
-	FILE *data;
+	FILE *data = NULL;
 	int instructionCounter, dataCounter, lineCounter;
 	char lineContent[LINE_LENGTH];
 
-	fopen(filename, "r");
+	data = fopen(filename, "r");
 
 	for (lineCounter = 1; fgets(lineContent, LINE_LENGTH, data); lineCounter++)
 	{
@@ -71,6 +74,32 @@ int assemble(char *filename)
 		if (lineContent[currentChar] == '.')
 		{
 			/* It is a special instruction */
+			char specialInstruction[10];
+			int i;
+
+			for (i = 0, currentChar++; lineContent[currentChar] != ' '; i++, currentChar++) {
+				specialInstruction[i] = lineContent[currentChar];
+			}
+			IGNORE_SPACES(lineContent, currentChar);
+			if (strcmp("data", specialInstruction)) {
+				/* .data instruction, get the numbers */
+
+			}
+			else if (strcmp("string", specialInstruction)) {
+				/* .string instruction */
+			}
+			else if (strcmp("extern", specialInstruction)) {
+				/* .extern instruction */
+			}
+			else if (strcmp("entry", specialInstruction)) {
+				/* .entry instruction */
+			}
+			else {
+				/* unknown instruction */
+
+			}
+			
+			
 		}
 		else
 		{
@@ -145,22 +174,45 @@ int isLegalChar(char c)
 }
 
 operand getOperand(char line[LINE_LENGTH], int i) {
+	operand op;
+
 	/* Check if number */
 	if (line[i] == '#')
 	{
 		int num = (line[i+1] == '+') ? 1 : -1;
 		if(line[i+1] != '-' && num == -1) { /* Illegal num */}
-		/* Number */
+		/* get the number */
 		for (i++; line[i] != ' ' && line[i] != ','; i++)
 		{
-			i *= 10;
-			i += line[i] - '0';
+			num *= 10;
+			num += line[i] - '0';
 		}
+
+		op = { .type = Number, num };
+		
 	}
 	else if (line[i] == 'r' && !isLegalChar(line[i + 2]) && line[i + 1] > '0' && line[i + 1] < '7') {
 		/* Register */
+		switch (line[i + 1])
+		{
+		case 1: op = { Reg, r1 }; break;
+		case 2: op = { Reg, r2 }; break;
+		case 3: op = { Reg, r3 }; break;
+		case 4: op = { Reg, r4 }; break;
+		default: /* ERROR: Unknown register */ break;
+
+		}
 	}
 	else {
 		/* Label */
+		char label[LABEL_LENGTH];
+		int j;
+		for (j = i; j < LABEL_LENGTH && isLegalChar(line[j]); j++)
+		{
+			/* j = i + <current_iteration_number> */
+			label[j - i] = line[j];
+		}
 	}
+
+	return op;
 }
