@@ -2,35 +2,32 @@
 #define LABEL_LENGTH 30
 #endif
 
-typedef struct Symbol {
-	char label[LABEL_LENGTH];
-	int counter;
-	int content;
-	enum SymbolType type;
-	struct Symbol *next;
-	
-} Symbol;
+#ifndef NULL
+#define NULL 0
+#endif
 
-typedef enum SymbolType {
-	Code, Data
-} SymbolType;
+#include "datastructures.h"
 
-typedef enum Register {
-	r1, r2, r3, r4
-} Register;
+/* Define at most 80 numbers or string characters to be used in a single .data line, line length is at most 80 anyway */
+#define MAX_DATA 80
 
-typedef union OperandData {
-	int number;
-	char label[LABEL_LENGTH];
-	Register reg;
-} OperandData;
 
-typedef enum OperandType {
-	Reg, Number, Label
-} OperandType;
 
-typedef struct operand {
-	OperandType type;
-	OperandData data;
-} operand;
 
+
+
+/* Finds a symbol with the given label */
+Symbol *lookup(Symbol *table, char *name)
+{
+	while (table->next != NULL)
+	{
+		if (strcmp(name, table->label)) {
+			/* Found it */
+			return table;
+		}
+
+		table = table->next;
+	}
+
+	return NULL;
+}

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "datastructures.c"
+#include "datastructures.h"
 
 #define IGNORE_SPACES(n,i) { for(++i; n[i] == ' ' || n[i] == '\t'; ++i); }
 #define GET_NUM(num, i, src) { };
@@ -12,12 +12,17 @@
 #define TRUE 1
 #define FALSE 0
 
+#define DELIMITER 101
+#define BLANK_LABEL "$"
+
 /* Prototypes */
 int assemble(char *filename);
 int isLegalChar(char c);
-operand getOperand(char line[LINE_LENGTH], int);
+Operand getOperand(char line[LINE_LENGTH], int);
+int getNumber(char *, int *);
 /* Global variables */
-Symbol ExternTable;
+Symbol *ExternTable = NULL;
+Symbol *SymbolTable = NULL;
 
 #pragma warning(disable : 4996)
 
@@ -38,8 +43,10 @@ int assemble(char *filename)
 	int instructionCounter, dataCounter, lineCounter;
 	char lineContent[LINE_LENGTH];
 
+	instructionCounter = dataCounter = 0;
 	data = fopen(filename, "r");
 
+	/* Go over all lines */
 	for (lineCounter = 1; fgets(lineContent, LINE_LENGTH, data); lineCounter++)
 	{
 		/* Go over each row individually */
@@ -83,6 +90,53 @@ int assemble(char *filename)
 			IGNORE_SPACES(lineContent, currentChar);
 			if (strcmp("data", specialInstruction)) {
 				/* .data instruction, get the numbers */
+				int size = 0;
+				int numbers[MAX_DATA];
+				/* Get all numbers in the line */
+				while (lineContent[currentChar] != '\n')
+				{
+					int n;
+
+					n = getNumber(lineContent, &currentChar);
+					if(lineContent[currentChar] != ',') { /* error */}
+					numbers[size] = n;
+					IGNORE_SPACES(lineContent, currentChar);
+
+					size++;
+				}
+
+				/* Insert the data instruction to the table */
+
+				Symbol sym;
+				sym.counter = dataCounter;
+				sym.size = size;
+				/* If there is a label, attach it, otherwise attach a blank label "$" */
+				if (isLabel)
+					strcpy(sym.label, label);
+				else
+					strcpy(sym.label, BLANK_LABEL);
+				sym.type = Data;
+				for (i = 0; i < size; i++)
+				{
+					sym.content[i] = numbers[i];
+				}
+
+				/* Actually insert it */
+				if (SymbolTable == NULL)
+				{
+					/* First time */
+
+					SymbolTable = &sym;
+					
+				}
+				else {
+					if (lookup(SymbolTable, label) != NULL && isLabel) {
+						/* Error: Can't have same labels twice */
+					} else
+						SymbolTable->next = &sym;
+				}
+
+				dataCounter += size;
 
 			}
 			else if (strcmp("string", specialInstruction)) {
@@ -105,7 +159,7 @@ int assemble(char *filename)
 		{
 			/* An instruction.  */
 			short numOperands = 0;
-			operand operands[2];
+			Operand operands[2];
 
 			/* Get the operator */
 			char op[MAX_OP_LENGTH] = { lineContent[currentChar],lineContent[currentChar + 1],lineContent[currentChar + 2],lineContent[currentChar + 3] };
@@ -152,9 +206,16 @@ int assemble(char *filename)
 					if (numOperands == 1) { L = 2; }
 					if (numOperands == 2) {
 						/* Complicated. Need to check more precisely operands. */
+
+						if (operands[0].type == Reg && operands[1].type == Reg);
+						if (operands[0].type == Label) L++;
 					}
 
 					/* Finally ready to finish with processing the line. */
+
+					
+
+					instructionCounter += L;
 				}
 
 
@@ -164,6 +225,11 @@ int assemble(char *filename)
 		}
 
 	}
+	
+	fclose(data);
+	/* Finished going over all lines first time, ready to create machine code */
+	
+
 
 }
 
@@ -173,32 +239,29 @@ int isLegalChar(char c)
 
 }
 
-operand getOperand(char line[LINE_LENGTH], int i) {
-	operand op;
+Operand getOperand(char line[LINE_LENGTH], int i) {
+	Operand op;
 
 	/* Check if number */
 	if (line[i] == '#')
 	{
-		int num = (line[i+1] == '+') ? 1 : -1;
-		if(line[i+1] != '-' && num == -1) { /* Illegal num */}
-		/* get the number */
-		for (i++; line[i] != ' ' && line[i] != ','; i++)
-		{
-			num *= 10;
-			num += line[i] - '0';
-		}
+		
+		int num;
+		num = getNumber(line, &i);
 
-		op = { .type = Number, num };
+		op.type = Number;
+		op.data.number = num;
 		
 	}
 	else if (line[i] == 'r' && !isLegalChar(line[i + 2]) && line[i + 1] > '0' && line[i + 1] < '7') {
 		/* Register */
+		op.type = Reg;
 		switch (line[i + 1])
 		{
-		case 1: op = { Reg, r1 }; break;
-		case 2: op = { Reg, r2 }; break;
-		case 3: op = { Reg, r3 }; break;
-		case 4: op = { Reg, r4 }; break;
+		case 1: op.data.reg = r1; break;
+		case 2: op.data.reg = r2; break;
+		case 3: op.data.reg = r3; break;
+		case 4: op.data.reg = r4; break;
 		default: /* ERROR: Unknown register */ break;
 
 		}
@@ -212,7 +275,26 @@ operand getOperand(char line[LINE_LENGTH], int i) {
 			/* j = i + <current_iteration_number> */
 			label[j - i] = line[j];
 		}
+
+		if (line[j] == '[') {
+			/* Special label stuff */
+
+		}
 	}
 
 	return op;
+}
+
+int getNumber(char line[LINE_LENGTH], int *i)
+{
+	int num = (line[*i + 1] == '+') ? 1 : -1;
+	if (line[*i + 1] != '-' && num == -1) { /* Illegal num */ }
+	/* get the number */
+	for (*i++; line[*i] != ' ' && line[*i] != ','; *i++)
+	{
+		num *= 10;
+		num += line[*i] - '0';
+	}
+
+	return num;
 }
