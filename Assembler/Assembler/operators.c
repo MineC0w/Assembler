@@ -1,4 +1,5 @@
 #include "datastructures.h"
+#include <malloc.h>
 
 #define MOV
 #define STOP

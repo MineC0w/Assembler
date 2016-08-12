@@ -4,25 +4,18 @@
 #define datastructures_h
 
 #define LABEL_LENGTH 30
-#define MAX_DATA 50
+#define MAX_DATA 80
 
 typedef enum Registers {
 	r1, r2, r3, r4
 } Register;
-enum _OperandType {
-	Code, Data, String
-};
-
-union _OperandData {
-	int number;
-	char label[LABEL_LENGTH];
-	Register reg;
-};
 
 
-enum _SymbolType {
+
+
+typedef enum SymbolType {
 	Data, Code, String
-};
+} SymbolType;
 
 typedef union OperandData {
 	int number;
@@ -35,12 +28,11 @@ typedef enum OperandType {
 } OperandType;
 
 
-typedef struct _Operand {
+typedef struct Operand {
 	OperandData data;
 	OperandType type;
 } Operand;
 
-typedef enum _SymbolType SymbolType;
 typedef struct Symbol {
 	char label[LABEL_LENGTH];
 	int counter;

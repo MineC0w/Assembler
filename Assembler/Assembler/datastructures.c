@@ -7,12 +7,7 @@
 #endif
 
 #include "datastructures.h"
-
-/* Define at most 80 numbers or string characters to be used in a single .data line, line length is at most 80 anyway */
-#define MAX_DATA 80
-
-
-
+#include <string.h>
 
 
 

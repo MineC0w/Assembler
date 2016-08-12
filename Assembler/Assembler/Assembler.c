@@ -141,6 +141,39 @@ int assemble(char *filename)
 			}
 			else if (strcmp("string", specialInstruction)) {
 				/* .string instruction */
+				char str[MAX_DATA];
+				int size = 0;
+				IGNORE_SPACES(lineContent, lineCounter);
+				
+				while (lineContent[lineCounter] != '\n')
+				{
+					if (lineContent[lineCounter] == '"')
+					{
+						/* proper string beginning */
+						int j;
+						/* Save all chars in an array */
+						for (j = 0, lineCounter++; lineContent[lineCounter] != '"'; size++, lineCounter++, j++) {
+							str[size] = lineContent[lineCounter];
+							dataCounter++;
+						}
+						str[size + 1] = '\0';
+						/* Check if there is another string afterwards */
+						lineCounter++;
+						IGNORE_SPACES(lineContent, lineCounter);
+						if (lineContent[lineCounter] == ',') {
+							/* another string */
+							lineCounter++;
+						}
+					}
+					else {
+						/* Missing , or " */
+					}
+
+
+				}
+				/* Insert the string into the table */
+
+
 			}
 			else if (strcmp("extern", specialInstruction)) {
 				/* .extern instruction */
